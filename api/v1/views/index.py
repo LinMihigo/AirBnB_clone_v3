@@ -31,9 +31,5 @@ def index():
 @app_views.route('/stats', methods=['GET'])
 def count():
     """Retrieves the number of each objects by type"""
-    dict = {}
-    print(storage.all())
-    for key, value in classes.items():
-        dict[key] = storage.count(value)
-    
+    dict = {k: storage.count(v) for k, v in classes.items()}    
     return jsonify(dict)
