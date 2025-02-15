@@ -13,11 +13,11 @@ from models.state import State
 from models.user import User
 
 classes = {
-  "amenities": Amenity, 
-  "cities": City, 
-  "places": Place, 
-  "reviews": Review, 
-  "states": State, 
+  "amenities": Amenity,
+  "cities": City,
+  "places": Place,
+  "reviews": Review,
+  "states": State,
   "users": User
 }
 
@@ -31,5 +31,5 @@ def index():
 @app_views.route('/stats', methods=['GET'])
 def count():
     """Retrieves the number of each objects by type"""
-    dict = {k: storage.count(v) for k, v in classes.items()}    
+    dict = {k: storage.count(v) for k, v in classes.items()}
     return jsonify(dict)
