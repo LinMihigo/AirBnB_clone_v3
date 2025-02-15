@@ -52,7 +52,7 @@ class DBStorage:
         return (new_dict)
 
     def count(self, cls=None):
-        """Counts number of objects in storage"""
+        """Counts number of objects in storage."""
         new_dict = {}
         if cls is None:
             for clss in classes:
