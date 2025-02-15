@@ -1,7 +1,7 @@
 #!/usr/bin/python3
 """app.py"""
 
-from flask import Flask
+from flask import Flask, jsonify
 from models import storage
 from api.v1.views import app_views
 
@@ -18,6 +18,12 @@ app.register_blueprint(app_views)
 def storage_close(exception=None):
     """Calls storage.close()"""
     storage.close()
+
+
+@app.errorhandler(404)
+def page_not_found(error):
+    """Return a json data on 404 page"""
+    return jsonify(error="Not found")
 
 
 if __name__ == "__main__":
