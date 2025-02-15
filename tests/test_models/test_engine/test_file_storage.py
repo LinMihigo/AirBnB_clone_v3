@@ -79,6 +79,54 @@ class TestFileStorage(unittest.TestCase):
         self.assertIs(new_dict, storage._FileStorage__objects)
 
     @unittest.skipIf(models.storage_t == 'db', "not testing file storage")
+    def test_count(self):
+        """test that count returns the number objects from file.json"""
+        storage = FileStorage()
+        save = FileStorage._FileStorage__objects
+        FileStorage._FileStorage__objects = {}
+        test_dict = {}
+        for key, value in classes.items():
+            with self.subTest(key=key, value=value):
+                instance = value()
+                instance_key = key + "." + instance.id
+                storage.new(instance)
+                test_dict[instance_key] = instance
+        self.assertEqual(storage.all(), test_dict)
+        self.assertEqual(storage.count(), len(test_dict))
+        self.assertEqual(
+            storage.count(State),
+            sum(1 for k in storage.all() if k.startswith("State"))
+        )
+        FileStorage._FileStorage__objects = save
+
+    @unittest.skipIf(models.storage_t == 'db', "not testing file storage")
+    def test_get(self):
+        """test that count returns the correct object in file storage"""
+        storage = FileStorage()
+        save = FileStorage._FileStorage__objects
+        FileStorage._FileStorage__objects = {}
+        test_dict = {}
+        for key, value in classes.items():
+            if key != "User":
+                with self.subTest(key=key, value=value):
+                    instance = value()
+                    instance_key = key + "." + instance.id
+                    storage.new(instance)
+                    test_dict[instance_key] = instance
+        self.assertEqual(storage.all(), test_dict)
+        self.assertEqual(storage.get(State, "random_id_not_stored"), None)
+        first_state_id = list(storage.all(State).values())[0].id
+        self.assertEqual(
+            storage.get(User, first_state_id),
+            None
+        )
+        self.assertEqual(
+            storage.get(State, first_state_id),
+            list(storage.all(State).values())[0]
+        )
+        FileStorage._FileStorage__objects = save
+
+    @unittest.skipIf(models.storage_t == 'db', "not testing file storage")
     def test_new(self):
         """test that new adds an object to the FileStorage.__objects attr"""
         storage = FileStorage()
