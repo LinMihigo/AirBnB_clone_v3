@@ -14,7 +14,6 @@ from models.user import User
 def get_city_places(city_id):
     """Retrieves list of all places in a city"""
     city = storage.get(City, city_id)
-    print(city)
     places = storage.all(Place)
     if city_id != city.id:
         abort(404)
