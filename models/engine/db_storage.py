@@ -78,10 +78,10 @@ class DBStorage:
         for clss in classes:
             if cls is classes[clss]:
                 obj = self.__session.query(cls)\
-                    .filter(classes[clss].id.like(id)).all()
-                return obj[0]
+                    .filter(classes[clss].id.like(id)).first()
+                return obj
         return None
-
+    
     def new(self, obj):
         """add the object to the current database session"""
         self.__session.add(obj)
