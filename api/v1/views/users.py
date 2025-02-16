@@ -49,9 +49,11 @@ def update_user(user_id):
 
     data = request.get_json()
     output = storage.all()
+    ignore_keys = {'id', 'email', 'created_at', 'updated_at'}
     if "User" + "." + user_id in output.keys():
         for k, v in data.items():
-            setattr(output["User" + "." + user_id], k, v)
+            if k not in ignore_keys:
+                setattr(output["User" + "." + user_id], k, v)
         output["User" + "." + user_id].save()
         return jsonify(output["User" + "." + user_id]), 200
     else:
