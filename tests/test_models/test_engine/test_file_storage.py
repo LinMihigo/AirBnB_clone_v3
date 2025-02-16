@@ -114,12 +114,9 @@ class TestFileStorage(unittest.TestCase):
                     storage.new(instance)
                     test_dict[instance_key] = instance
         self.assertEqual(storage.all(), test_dict)
-        self.assertEqual(storage.get(State, "random_id_not_stored"), None)
+        self.assertIsNone(storage.get(State, "random_id_not_stored"))
         first_state_id = list(storage.all(State).values())[0].id
-        self.assertEqual(
-            storage.get(User, first_state_id),
-            None
-        )
+        self.assertIsNone(storage.get(User, first_state_id))
         self.assertEqual(
             storage.get(State, first_state_id),
             list(storage.all(State).values())[0]
