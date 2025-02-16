@@ -23,7 +23,7 @@ def storage_close(exception=None):
 @app.errorhandler(404)
 def page_not_found(error):
     """Return a json data on 404 page"""
-    return jsonify(error="Not found")
+    return jsonify(error="Not found"), 404
 
 
 if __name__ == "__main__":
