@@ -53,12 +53,14 @@ def update_state_id(state_id):
 
     data = request.get_json()
     output = storage.all()
+    ignore_keys = {'id', 'created_at', 'updated_at'}
 
     if not "State" + "." + state_id in output.keys():
         abort(404)
     else:
         for key, value in data.items():
-            setattr(output["State" + "." + state_id], key, value)
+            if key not in ignore_keys:
+                setattr(output["State" + "." + state_id], key, value)
         output["State" + "." + state_id].save()
         return jsonify(output["State" + "." + state_id].to_dict()), 200
 
