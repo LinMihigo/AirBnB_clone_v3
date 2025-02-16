@@ -10,7 +10,7 @@ from models.state import State
 
 
 @app_views.route('/states', methods=['GET'], strict_slashes=False)
-def handle_states():
+def get_states():
     """Retrieves list of all State objects"""
     states = storage.all(State)
     dict = [v.to_dict() for k, v in states.items()]
@@ -76,6 +76,6 @@ def del_state_id(state_id):
     if "State" + "." + state_id in states.keys():
         storage.delete(states["State" + "." + state_id])
         storage.save()
-        return jsonify({})
+        return jsonify({}), 200
     else:
         abort(404)
