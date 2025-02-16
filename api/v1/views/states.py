@@ -20,7 +20,7 @@ def handle_states():
 @app_views.route('/states', methods=['POST'], strict_slashes=False)
 def create_state():
     """Creates a state"""
-    if not request.get_json:
+    if not request.get_json():
         abort(400, description="Not a JSON")
     if "name" not in request.get_json():
         abort(400, description="Missing name")
@@ -48,7 +48,7 @@ def get_state_id(state_id):
 @app_views.route('/states/<state_id>', methods=['PUT'], strict_slashes=False)
 def update_state_id(state_id):
     """Updates a state obj of state_id"""
-    if not request.get_json:
+    if not request.get_json():
         abort(400, description="Not a JSON")
 
     data = request.get_json()
