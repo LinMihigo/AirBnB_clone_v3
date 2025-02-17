@@ -93,46 +93,49 @@ def add_place(city_id):
 
 @app_views.route('/places_search', methods=["POST"], strict_slashes=False)
 def places_search():
-    """Retrieves all Place objects based on JSON request body."""
+    """Retrieves all Place objects depending on the JSON request body."""
     if not request.get_json():
         abort(400, description="Not a JSON")
 
     data = request.get_json()
+    places = set()  # Use a set to avoid duplicates
 
     # If no filters are provided, return all places
     if not data or all(len(data.get(key, [])) == 0
                        for key in ["states", "cities", "amenities"]):
-        places = storage.all(Place).values()
-        return jsonify([place.to_dict() for place in places])
+        return jsonify([place.to_dict()
+                       for place in storage.all(Place).values()])
 
-    place_list = set()
+    # Retrieve states and cities from the request
+    states = data.get("states", [])
+    cities = data.get("cities", [])
 
-    # Fetch places based on states
-    if "states" in data and data["states"]:
-        for state_id in data["states"]:
-            state = storage.get(State, state_id)
-            if state:
-                for city in state.cities:
-                    place_list.update(city.places)
+    # Retrieve places from states (including all their cities)
+    city_ids = set()
+    for state_id in states:
+        state = storage.get(State, state_id)
+        if state:
+            city_ids.update(city.id for city in state.cities)
 
-    # Fetch places based on cities
-    if "cities" in data and data["cities"]:
-        for city_id in data["cities"]:
-            city = storage.get(City, city_id)
-            if city:
-                place_list.update(city.places)
+    # Add explicitly listed cities (avoid duplicate processing)
+    for city_id in cities:
+        city_ids.add(city_id)
 
-    # Convert set to list for further processing
-    place_list = list(place_list)
+    # Retrieve places from collected city IDs
+    for city_id in city_ids:
+        city = storage.get(City, city_id)
+        if city:
+            places.update(city.places)
 
-    # Filter places based on amenities
+    # Filter places by amenities (if specified)
     if "amenities" in data and data["amenities"]:
-        amenities_ids = set(data["amenities"])
+        amenity_ids = set(data["amenities"])
         filtered_places = []
-        for place in place_list:
+        for place in places:
             place_amenities = {amenity.id for amenity in place.amenities}
-            if amenities_ids.issubset(place_amenities):
+            # Place must have ALL amenities
+            if amenity_ids.issubset(place_amenities):
                 filtered_places.append(place)
-        place_list = filtered_places
+        places = filtered_places
 
-    return jsonify([place.to_dict() for place in place_list])
+    return jsonify([place.to_dict() for place in places])
