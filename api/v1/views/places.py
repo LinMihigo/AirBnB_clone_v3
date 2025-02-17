@@ -7,6 +7,8 @@ from models import storage
 from models.place import Place
 from models.city import City
 from models.user import User
+from models.state import State
+from models.amenity import Amenity
 
 
 @app_views.route('/cities/<city_id>/places', methods=['GET'],
@@ -87,3 +89,50 @@ def add_place(city_id):
         place = Place(**data)
         place.save()
         return jsonify(place.to_dict()), 200
+
+
+@app_views.route('/places_search', methods=["POST"], strict_slashes=False)
+def places_search():
+    """Retrieves all Place objects based on JSON request body."""
+    if not request.get_json():
+        abort(400, description="Not a JSON")
+
+    data = request.get_json()
+
+    # If no filters are provided, return all places
+    if not data or all(len(data.get(key, [])) == 0
+                       for key in ["states", "cities", "amenities"]):
+        places = storage.all(Place).values()
+        return jsonify([place.to_dict() for place in places])
+
+    place_list = set()
+
+    # Fetch places based on states
+    if "states" in data and data["states"]:
+        for state_id in data["states"]:
+            state = storage.get(State, state_id)
+            if state:
+                for city in state.cities:
+                    place_list.update(city.places)
+
+    # Fetch places based on cities
+    if "cities" in data and data["cities"]:
+        for city_id in data["cities"]:
+            city = storage.get(City, city_id)
+            if city:
+                place_list.update(city.places)
+
+    # Convert set to list for further processing
+    place_list = list(place_list)
+
+    # Filter places based on amenities
+    if "amenities" in data and data["amenities"]:
+        amenities_ids = set(data["amenities"])
+        filtered_places = []
+        for place in place_list:
+            place_amenities = {amenity.id for amenity in place.amenities}
+            if amenities_ids.issubset(place_amenities):
+                filtered_places.append(place)
+        place_list = filtered_places
+
+    return jsonify([place.to_dict() for place in place_list])
