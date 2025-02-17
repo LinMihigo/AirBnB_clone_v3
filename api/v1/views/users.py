@@ -18,7 +18,7 @@ def get_users():
 @app_views.route('/users', methods=["POST"], strict_slashes=False)
 def add_user():
     """Creates a user"""
-    if not request.get_json:
+    if not request.get_json():
         abort(400, description="Not a JSON")
     if "email" not in request.get_json():
         abort(400, description="Missing email")
@@ -44,14 +44,16 @@ def get_user_id(user_id):
 @app_views.route('/users/<user_id>', methods=['PUT'], strict_slashes=False)
 def update_user(user_id):
     """Updates a user of user_id"""
-    if not request.get_json:
+    if not request.get_json():
         abort(400, description="Not a JSON")
 
     data = request.get_json()
     output = storage.all()
+    ignore_keys = {'id', 'email', 'created_at', 'updated_at'}
     if "User" + "." + user_id in output.keys():
         for k, v in data.items():
-            setattr(output["User" + "." + user_id], k, v)
+            if k not in ignore_keys:
+                setattr(output["User" + "." + user_id], k, v)
         output["User" + "." + user_id].save()
         return jsonify(output["User" + "." + user_id]), 200
     else:

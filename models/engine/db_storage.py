@@ -81,7 +81,7 @@ class DBStorage:
                     .filter(classes[clss].id.like(id)).first()
                 return obj
         return None
-    
+
     def new(self, obj):
         """add the object to the current database session"""
         self.__session.add(obj)
