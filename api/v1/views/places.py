@@ -100,7 +100,6 @@ def places_search():
     data = request.get_json()
     places = set()  # Use a set to avoid duplicates
 
-    # If no filters are provided, return all places
     if not data or all(len(data.get(key, [])) == 0
                        for key in ["states", "cities", "amenities"]):
         return jsonify([place.to_dict()
@@ -110,18 +109,15 @@ def places_search():
     states = data.get("states", [])
     cities = data.get("cities", [])
 
-    # Retrieve places from states (including all their cities)
     city_ids = set()
     for state_id in states:
         state = storage.get(State, state_id)
         if state:
             city_ids.update(city.id for city in state.cities)
 
-    # Add explicitly listed cities (avoid duplicate processing)
     for city_id in cities:
         city_ids.add(city_id)
 
-    # Retrieve places from collected city IDs
     for city_id in city_ids:
         city = storage.get(City, city_id)
         if city:
